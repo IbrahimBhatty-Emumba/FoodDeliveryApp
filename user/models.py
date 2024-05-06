@@ -1,19 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
-# class Users(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     name = models.CharField(max_length=200)
-#     email = models.CharField(max_length=200)
-#     password = models.CharField(max_length=300)
-#     type = models.CharField(max_length=50)
-#     address = models.CharField(max_length=300)
-#     phone = models.CharField(max_length=200)
-#     created_date = models.DateField(auto_now_add=True)
-
-#     class Meta:
-#         managed = True
-#         db_table = 'users'
 
 class UserManager(BaseUserManager):
 
@@ -39,6 +26,19 @@ class UserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
+class Permissions(models.Model):
+    id = models.AutoField(primary_key=True)
+    label = models.CharField(max_length=100, default="NO_NAME")
+    endpoint = models.CharField(max_length=100)
+
+class Roles(models.Model):
+    id = models.AutoField(primary_key=True)
+    label = models.CharField(max_length=100)
+
+class Role_Permission_M2M(models.Model):
+    id = models.AutoField(primary_key=True)
+    role = models.ForeignKey(Roles, on_delete=models.CASCADE)
+    permission = models.ForeignKey(Permissions, on_delete=models.CASCADE)
 
 class Users(AbstractUser):
     username = None
@@ -49,6 +49,7 @@ class Users(AbstractUser):
     phone = models.CharField(max_length=200)
     created_date = models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=50)
+    role = models.ForeignKey(Roles, on_delete=models.CASCADE, default=1)
     class Meta:
         managed = True
         db_table = 'users'
@@ -60,5 +61,7 @@ class Users(AbstractUser):
 
     def __str__(self):
         return str(self.id)
+
+
 
 

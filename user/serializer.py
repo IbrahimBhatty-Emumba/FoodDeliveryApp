@@ -1,6 +1,6 @@
 from rest_framework import serializers
 import re
-from .models import Users
+from .models import Users, Roles, Permissions, Role_Permission_M2M
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta: 
         model = Users
-        fields = [ "name", "email", "password", "type", "address", "phone", "created_date"]  
+        fields = [ "name", "email", "password", "type", "role", "address", "phone", "created_date"]  
         # exclude = ["Id"]
     
     def validate(self, attrs):
@@ -52,8 +52,21 @@ class UserSerializer(serializers.ModelSerializer):
 
 
     
-        # If any validation errors occurred, raise ValidationError
         if errors:
             raise serializers.ValidationError(errors)
 
         return attrs
+    
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Roles
+        fields = ["id","label"]
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permissions
+        fields = ["id","label","endpoint"]
+class RolesPermissionsM2mSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role_Permission_M2M
+        fields = ["id","role","permission"]

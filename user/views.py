@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework_simplejwt.tokens import Token, RefreshToken
-from .service import UserService
+from .service import UserService, UserRoleService
 
 class UserApiView(APIView):
       
@@ -38,23 +38,69 @@ class LoginApiView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')
-        # print(email,password)
+
         user = self.service_inst.authenticate_user(email, password)
-        print(user)
-        print("from login")
+
+        user_role = self.service_inst.get_user_role(user.id)
+        role_id = user_role.id
         if user:
-            # access_token = Token.for_user(user)
-            # print(access_token)
-            # Generate refresh token
+          
             refresh_token = RefreshToken.for_user(user)
 
-            # Now you can print or return the tokens
-            # print(access_token)
+            
             print(refresh_token)
             payload = {
                 'refresh': str(refresh_token),
                 'access': str(refresh_token.access_token),
+                'role':role_id
             }
             return Response(payload)
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class RolesApiView(APIView):
+    def __init__(self):
+        self.service_inst = UserRoleService()
+    
+    def get(self, request, *args, **kwargs):
+        roles = self.service_inst.get_all_roles()
+        return Response(roles.data)
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            role = self.service_inst.create_new_role(data)
+            if role:
+                return Response(role, status=status.HTTP_201_CREATED)
+            else:
+                return Response("Invalid Data", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response("Internal Server Error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class PermissionsApiView(APIView):
+    def __init__(self):
+        self.service_inst = UserRoleService()
+
+    def get(self, request, *args, **kwargs):
+         
+        if(request.query_params.get("id")):
+            id = int(request.query_params.get("id"))
+            role_permissions = self.service_inst.get_role_permissions(id)
+            return Response(role_permissions.data)
+        else:
+            permissions = self.service_inst.get_all_permissions()
+            return Response(permissions.data)
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            created_permission = self.service_inst.create_new_permissions(data)
+            if created_permission:
+                return Response(created_permission, status=status.HTTP_201_CREATED)
+            else:
+                return Response("Invalid Data", status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            return Response("Internal Server Error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
