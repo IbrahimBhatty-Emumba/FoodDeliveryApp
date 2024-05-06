@@ -42,7 +42,7 @@ class LoginApiView(APIView):
         user = self.service_inst.authenticate_user(email, password)
 
         user_role = self.service_inst.get_user_role(user.id)
-        role_id = user_role.id
+        role_id = user_role.id  
         if user:
           
             refresh_token = RefreshToken.for_user(user)
