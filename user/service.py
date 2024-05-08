@@ -57,6 +57,11 @@ class UserRoleService:
     
     def __init__(self):
         self.dal_inst = RolesAndPermissionDAL()
+        
+    @staticmethod
+    def get_endpoints_for_role(self, role_id):
+        permissions = self.dal_inst.get_role_permissions(role_id)
+        return permissions
 
     def get_all_roles(self):
         roles = self.dal_inst.get_all_roles()

@@ -40,7 +40,13 @@ class RolesAndPermissionDAL:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-
+    
+    @staticmethod
+    def get_endpoints_for_role(self, role_id):
+        permission_ids = Role_Permission_M2M.objects.filter(role_id=role_id).values_list('permission', flat=True)
+        permissions = Permissions.objects.filter(id__in=permission_ids).values_list('endpoint', flat=True)
+        return list(permissions)
+    
     def get_all_roles(self):
         return Roles.objects.all()
     

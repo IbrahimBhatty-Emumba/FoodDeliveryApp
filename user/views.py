@@ -4,6 +4,15 @@ from rest_framework import status
 from rest_framework import permissions
 from rest_framework_simplejwt.tokens import Token, RefreshToken
 from .service import UserService, UserRoleService
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializer import CustomTokenObtainPairSerializer
+
+
+def get_endpoints_for_role(role_id):
+    return UserRoleService.get_endpoints_for_role(role_id) 
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 class UserApiView(APIView):
       
@@ -41,20 +50,28 @@ class LoginApiView(APIView):
 
         user = self.service_inst.authenticate_user(email, password)
 
-        user_role = self.service_inst.get_user_role(user.id)
-        role_id = user_role.id  
         if user:
-          
+            user_role = self.service_inst.get_user_role(user.id)
+            role_id = user_role.id
+            role_id_serializable = str(role_id)
+
+            token_serializer = CustomTokenObtainPairSerializer()
+           
+
             refresh_token = RefreshToken.for_user(user)
+            
+            access_token  = token_serializer.get_token(user)
 
             
-            print(refresh_token)
-            payload = {
-                'refresh': str(refresh_token),
-                'access': str(refresh_token.access_token),
-                'role':role_id
-            }
-            return Response(payload)
+            if refresh_token and access_token:
+                payload = {
+                    'refresh': str(refresh_token),
+                    'access': str(access_token),
+                    'role': role_id_serializable
+                }
+                return Response(payload)
+            else:
+                return Response({'error': 'Failed to generate tokens'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 

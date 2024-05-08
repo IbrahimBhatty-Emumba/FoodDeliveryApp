@@ -1,5 +1,8 @@
 from rest_framework import serializers
 import re
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
 from .models import Users, Roles, Permissions, Role_Permission_M2M
 
 class UserSerializer(serializers.ModelSerializer):
@@ -70,3 +73,12 @@ class RolesPermissionsM2mSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role_Permission_M2M
         fields = ["id","role","permission"]
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # Add custom claims here
+        token['role'] = user.role.id  # Assuming user has a 'role' attribute
+        return token
+    
