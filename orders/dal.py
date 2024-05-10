@@ -1,4 +1,5 @@
 from .models import Orders, OrdersItemsM2M
+from restaurant.models import Menu_Items
 
 class OrderDal:
     _instance = None
@@ -7,7 +8,7 @@ class OrderDal:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    #unit of work?
+    
     def create_order(self, order_data):
         order_instance = Orders.objects.create(**order_data)
         return order_instance
@@ -20,5 +21,9 @@ class OrderDal:
         order_instance = Orders.objects.get(pk = id)
         order_instance.is_completed = True
         order_instance.save()
-        print("this is the order instance", order_instance)
         return order_instance
+    
+    def get_item_cost(self, item_id):
+        item = Menu_Items.objects.get(pk = item_id)
+        cost = item.cost 
+        return cost

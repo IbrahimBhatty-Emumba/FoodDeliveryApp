@@ -2,10 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from rest_framework_simplejwt.tokens import Token, RefreshToken
+from rest_framework_simplejwt.tokens import  RefreshToken
 from .service import UserService, UserRoleService
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializer import CustomTokenObtainPairSerializer
+import jwt
+from django.conf import settings
 
 
 def get_endpoints_for_role(role_id):
@@ -43,11 +45,13 @@ class UserApiView(APIView):
 class LoginApiView(APIView):
     def __init__(self):
         self.service_inst = UserService()
-    
-    def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        password = request.data.get('password')
 
+        
+    def post(self, request, *args, **kwargs):
+        
+        email = request.headers.get('Email')
+        password = request.headers.get('Password')
+       
         user = self.service_inst.authenticate_user(email, password)
 
         if user:
@@ -62,13 +66,19 @@ class LoginApiView(APIView):
             
             access_token  = token_serializer.get_token(user)
 
-            
+            # refresh_token['username'] = user.username
+            # refresh_token['email'] = user.email
+            refresh_token['roles'] = role_id_serializable
+
             if refresh_token and access_token:
                 payload = {
                     'refresh': str(refresh_token),
-                    'access': str(access_token),
-                    'role': role_id_serializable
+                    'access': str(refresh_token.access_token)
                 }
+                # token_bytes = refresh_token.encode()
+                # secret_key = settings.SECRET_KEY
+                # print("this is the decoded token",jwt.decode(token_bytes, secret_key, algorithms=["HS256"]))
+
                 return Response(payload)
             else:
                 return Response({'error': 'Failed to generate tokens'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -15,7 +15,7 @@ class OrderApiView(APIView):
     @transaction.atomic
     def post(self, request, userid, *args, **kwargs):
         try:
-            print(request)
+            print("this is the request to create an order", request)
 
             created_order = self.service_inst.create_order(request, userid)
 
@@ -26,6 +26,7 @@ class OrderApiView(APIView):
                 return Response("Invalid Data", status=status.HTTP_400_BAD_REQUEST)
     
         except Exception as e:
+            #make custom validation
             if str(e) == "No Available Drivers":
                 return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
             else:
