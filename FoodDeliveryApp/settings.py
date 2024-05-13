@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-djo4xke-sb#z$po4-o!^v@4d6((h%k#*v+#5$*b&&pwc9cwp&w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'FoodDeliveryApp.authorization_middleware.RBACMiddleware',
+    'FoodDeliveryApp.authorization_middleware.RBACMiddleware',
 ]
 AUTH_USER_MODEL = 'user.Users'
 
